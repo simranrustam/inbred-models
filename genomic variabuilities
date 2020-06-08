@@ -1,0 +1,37 @@
+library(cobs)
+library(quantreg)
+library(parallel)
+library(gplots)
+library(limma)
+library(grid)
+library(gridExtra)
+
+interpolate<-function(dat,curve){
+
+interpolate_points<-function(row,dat,curve){
+    MY_X=dat[row,1]
+    MY_Y=dat[row,2]
+    VAL1=tail(which(curve[,1]<MY_X),1)
+    VAL2=VAL1+1
+    X <- curve[c(VAL1,VAL2),1]
+    Y <- curve[c(VAL1,VAL2),2]
+    INTERP_Y=approx(X,Y,xout=MY_X)$y
+    INTERP_Y
+}
+res<-unlist(mclapply(seq(nrow(dat)),interpolate_points,dat=dat,curve=curve,mc.cores=8))
+res
+}
+
+################################################
+# prepare the analysis
+################################################
+
+# figure out what the project is
+IDX=grep("RP",rev(unlist(strsplit(getwd(),"/")))[1:2])
+PROJ=rev(unlist(strsplit(getwd(),"/")))[IDX]
+
+TG=paste(PROJ,".genes_fmt.tsv",sep="")
+TE6=paste(PROJ,".1e6_fmt.tsv",sep="")
+TE5=paste(PROJ,".1e5_fmt.tsv",sep="")
+TE4=paste(PROJ,".1e4_fmt.tsv",sep="")
+TE3=paste(PROJ,".1e3_fmt.tsv",sep="")
